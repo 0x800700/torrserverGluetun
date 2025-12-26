@@ -5,19 +5,19 @@ services:
     cap_add: [NET_ADMIN]
     devices: [/dev/net/tun:/dev/net/tun]
     ports:
-      - "8090:8090/tcp"
+      - 8090:8090/tcp
     volumes:
       - ./opt/gluetun:/gluetun
       - ./opt/gluetun/wg0.conf:/gluetun/wireguard/wg0.conf:ro
     environment:
       - VPN_SERVICE_PROVIDER=custom
       - VPN_TYPE=wireguard
-      - FIREWALL_OUTBOUND_SUBNETS=192.168.0.0/16,172.16.0.0/12
+      - FIREWALL_OUTBOUND_SUBNETS=192.168.0.0/16,172.16.0.0/12,172.17.0.0/16
     restart: always
 
   torrserver:
     image: ubuntu:22.04
-    container_name: torrserver_vpn
+    container_name: torrserver
     network_mode: service:gluetun
     depends_on:
       gluetun: {condition: service_healthy}
@@ -27,8 +27,7 @@ services:
     environment:
       - TS_LOGIN=${TS_USER}
       - TS_PASSWORD=${TS_PASS}
-    # Важно: ставим сертификаты, чтобы не было ошибки 255
     command: >
       sh -c "apt-get update && apt-get install -y ca-certificates && 
-      /usr/local/bin/TorrServer --port 8090 --path /db --httpauth --cache 512M"
+      /usr/local/bin/TorrServer --port 8090 --path /db --httpauth"
     restart: unless-stopped
