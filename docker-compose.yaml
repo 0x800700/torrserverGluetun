@@ -12,23 +12,18 @@ services:
     environment:
       - VPN_SERVICE_PROVIDER=custom
       - VPN_TYPE=wireguard
-      - FIREWALL_OUTBOUND_SUBNETS=192.168.88.0/24,172.16.0.0/12,172.17.0.0/16
+      - FIREWALL_OUTBOUND_SUBNETS=192.168.0.0/16,172.16.0.0/12
     restart: always
 
   torrserver:
-    image: ubuntu:22.04
+    image: ghcr.io/yourok/torrserver:matrix
     container_name: torrserver_vpn
     network_mode: service:gluetun
     depends_on:
       gluetun: {condition: service_healthy}
     volumes:
-      - ./opt/torrserver/bin/TorrServer:/usr/local/bin/TorrServer:ro
-      - ./opt/torrserver/db:/db
+      - ./opt/torrserver/db:/opt/torrserver/db
     environment:
-      - TS_LOGIN=${TS_USER}
-      - TS_PASSWORD=${TS_PASS}
-    # Установка сертификатов необходима для работы TorrServer на чистой Ubuntu
-    command: >
-      sh -c "apt-get update && apt-get install -y ca-certificates && 
-      /usr/local/bin/TorrServer --port 8090 --path /db --httpauth"
+      - TS_HTTP_USER=${TS_USER}
+      - TS_HTTP_PASS=${TS_PASS}
     restart: unless-stopped
