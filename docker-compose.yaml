@@ -16,14 +16,19 @@ services:
     restart: always
 
   torrserver:
-    image: ghcr.io/yourok/torrserver:matrix
+    image: ubuntu:22.04
     container_name: torrserver_vpn
     network_mode: service:gluetun
     depends_on:
       gluetun: {condition: service_healthy}
     volumes:
-      - ./opt/torrserver/db:/opt/torrserver/db
+      - ./opt/torrserver/bin/TorrServer:/usr/local/bin/TorrServer:ro
+      - ./opt/torrserver/db:/db
     environment:
-      - TS_HTTP_USER=${TS_USER}
-      - TS_HTTP_PASS=${TS_PASS}
+      - TS_LOGIN=${TS_USER}
+      - TS_PASSWORD=${TS_PASS}
+    # Важно: ставим сертификаты, чтобы не было ошибки 255
+    command: >
+      sh -c "apt-get update && apt-get install -y ca-certificates && 
+      /usr/local/bin/TorrServer --port 8090 --path /db --httpauth --cache 512M"
     restart: unless-stopped
