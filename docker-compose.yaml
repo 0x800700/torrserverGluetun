@@ -2,19 +2,15 @@ services:
   gluetun:
     image: qmcgaw/gluetun
     container_name: gluetun
-    cap_add:
-      - NET_ADMIN
-    devices:
-      - /dev/net/tun:/dev/net/tun
+    cap_add: [NET_ADMIN]
+    devices: [/dev/net/tun:/dev/net/tun]
     ports:
-      - "8090:8090/tcp" # Порт TorrServer пробрасывается через Gluetun
+      - 8090:8090/tcp
     volumes:
-      - ./opt/gluetun:/gluetun
       - ./opt/gluetun/wg0.conf:/gluetun/wireguard/wg0.conf:ro
     environment:
       - VPN_SERVICE_PROVIDER=custom
       - VPN_TYPE=wireguard
-      # Разрешаем доступ из локальных подсетей (настрой под свою сеть если нужно)
       - FIREWALL_OUTBOUND_SUBNETS=192.168.0.0/16,172.16.0.0/12,172.17.0.0/16
     restart: always
 
@@ -23,17 +19,11 @@ services:
     container_name: torrserver
     network_mode: service:gluetun
     depends_on:
-      gluetun:
-        condition: service_healthy
+      gluetun: {condition: service_healthy}
     volumes:
       - ./opt/torrserver/bin/TorrServer:/usr/local/bin/TorrServer:ro
       - ./opt/torrserver/db:/db
-    environment:
-      - TS_LOGIN=${TS_USER}
-      - TS_PASSWORD=${TS_PASS}
-    # Команда делает 3 вещи: обновляет сертификаты, подхватывает переменные и запускает бинарник
-    command: >
-      sh -c "apt-get update && apt-get install -y ca-certificates && 
-      export TS_LOGIN=$${TS_LOGIN} && export TS_PASSWORD=$${TS_PASSWORD} && 
-      /usr/local/bin/TorrServer --port 8090 --path /db --httpauth"
+      - ./opt/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro
+    # Мы используем универсальное имя TorrServer, которое скрипт даст бинарнику при скачивании
+    command: /usr/local/bin/TorrServer --port 8090 --path /db --httpauth
     restart: unless-stopped
