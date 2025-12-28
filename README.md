@@ -219,6 +219,16 @@ PrivateKey = xxxxxxxxxxxxxxxxxxxxx=
 
 > **Обратите внимание** на символ `=`, он является частью ключа и важен.
 
+### Linux Arm (Raspberry pi)!!
+
+```bash
+wget -O wgcf https://github.com/ViRb3/wgcf/releases/download/v2.2.29/wgcf_2.2.29_linux_armv7
+chmod +x wgcf
+./wgcf register
+./wgcf generate
+cat wgcf-profile.conf
+```
+
 ### macOS
 
 ```bash
