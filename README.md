@@ -275,14 +275,10 @@ chmod +x install.sh
 - TorrServer доступен в локальной сети
 - Весь внешний трафик идёт через VPN
 
-## Лицензия
+## License
 
-MIT License
+MIT License - see LICENSE file for details
 
-## Контакты
+## Credits
 
-Если у вас есть вопросы или предложения, создайте [Issue](https://github.com/0x800700/torrserverGluetun/issues) в репозитории.
-
----
-
-⭐ Если проект оказался полезным, поставьте звезду на GitHub!
+**Good enough is good enough by ProBably Works**
